@@ -91,6 +91,7 @@ void mixerLoop() {
     Serial.println("Reminding time is up");
     while (true) {
         wiggleOnce();
+        delay(SECS_TO_MS(5));
     }
 }
 
