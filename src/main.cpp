@@ -16,8 +16,6 @@ const int SERVO_STOP = 90;
 struct ServoSpeeds {
     int ccw_speed = 45;
     int cw_speed = 135;
-    // int ccw_speed = 85;
-    // int cw_speed = 95;
 
     int ccw_speed_slow = 85;
     int cw_speed_slow = 95;
@@ -30,7 +28,6 @@ const unsigned int MIX_TIME_MINUTES = 2;
 const unsigned int MIX_TIME_MS = MINS_TO_MS(MIX_TIME_MINUTES);
 
 Servo mixer;  // create servo object to control a servo
-// twelve servo objects can be created on most boards
 
 void setup() {
     Serial.begin(115200);
@@ -48,11 +45,13 @@ void mixOnce() {
 
 // Routine to make some noise so user is aware that unit is still energized after completing mixing cycle,
 // ie to remind user to turn off unit if not using
-void wiggleOnce() {
+enum WiggleSpeed { WIGGLE_FAST, WIGGLE_SLOW };
+void wiggleOnce(const WiggleSpeed wiggleSpeed=WIGGLE_SLOW) {
+    const uint32_t wiggleDelay = wiggleSpeed == WIGGLE_SLOW ? 750 : 100;
     mixer.write(servoSpeeds.cw_speed_slow);
-    delay(750);
+    delay(wiggleDelay);
     mixer.write(servoSpeeds.ccw_speed_slow);
-    delay(750);
+    delay(wiggleDelay);
 }
 
 void mixerLoop() {
@@ -64,6 +63,8 @@ void mixerLoop() {
 
     const unsigned long endTime = millis() + MIX_TIME_MS;
 
+    const int wiggleEvery = SECS_TO_MS(15);
+
     Serial.println("Beginning real mix loop");
     unsigned long curTime = millis();
     while (endTime > curTime) {
@@ -71,6 +72,11 @@ void mixerLoop() {
         Serial.print("Time left=");
         Serial.print(timeLeft);
         Serial.println("s");
+
+        // _count_ every 15ish seconds to make it easier to keep track of time
+        if (timeLeft % wiggleEvery == 0) {
+            wiggleOnce(WIGGLE_FAST);
+        }
 
         mixOnce();
         curTime = millis();
