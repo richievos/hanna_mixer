@@ -78,7 +78,7 @@ void mixerLoop() {
 
     // After mixing cycle, return mixer to storage position and wait 15 seconds for user to remove sample and turn off
     Serial.println("Finished");
-    mixer.write(0);
+    mixer.write(SERVO_STOP);
     delay(SECS_TO_MS(15));
 
     // if still on, start shaking periodically as a reminder to get turned off
